@@ -15,6 +15,7 @@ import com.ntp.identity_service.entity.User;
 public interface IUserMapper {
     
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     User toUser(UserCreationRequest request);
 
     
@@ -23,6 +24,7 @@ public interface IUserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "username", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     void update(@MappingTarget User user, UserUpdateRequest request);
 
 }

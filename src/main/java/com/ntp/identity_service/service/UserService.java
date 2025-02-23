@@ -3,7 +3,6 @@ package com.ntp.identity_service.service;
 import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +28,8 @@ public class UserService {
     IUserRepository userRepository;
 
     IUserMapper userMapper;
+
+    PasswordEncoder passwordEncoder;
     
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -37,7 +38,6 @@ public class UserService {
         
         User user = userMapper.toUser(request);
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<String> roles = new HashSet<>();
