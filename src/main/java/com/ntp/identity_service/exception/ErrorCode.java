@@ -1,5 +1,8 @@
 package com.ntp.identity_service.exception;
 
+import lombok.experimental.FieldDefaults;
+
+@FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(500, "Internal server error"),
@@ -13,8 +16,8 @@ public enum ErrorCode {
 
     ;
 
-    private int code;
-    private String message;
+    int code;
+    String message;
 
     ErrorCode(int code, String message) {
         this.code = code;

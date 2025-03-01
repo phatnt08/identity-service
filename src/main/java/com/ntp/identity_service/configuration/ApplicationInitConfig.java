@@ -16,21 +16,32 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@Slf4j
+/**
+ * Configuration class to initialize the application with default settings.
+ */
+@Configuration // spring annotation to indicate that this class is a configuration class
+@RequiredArgsConstructor // lombok annotation to generate a constructor with all final fields as arguments
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE) // lombok annotation to make the final fields private
+@Slf4j // lombok annotation to inject a logger
 public class ApplicationInitConfig {
 
+    // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
 
+    /**
+     * Bean to run custom logic after the application context is loaded.
+     * 
+     * @param userRepository the user repository to interact with the user data
+     * @return an ApplicationRunner to execute the custom logic
+     */
     @Bean
     ApplicationRunner applicationRunner(IUserRepository userRepository) {
         return _ -> {
             System.out.println("Application started");
 
+            // Check if the admin user exists, if not, create it
             if (userRepository.findByUsername("admin").isEmpty()) {
-                HashSet<String> roles = new HashSet<String>();
+                HashSet<String> roles = new HashSet<>();
                 roles.add(Role.ADMIN.name());
                 User admin = User.builder()
                         .username("admin")
@@ -41,8 +52,6 @@ public class ApplicationInitConfig {
                 userRepository.save(admin);
                 log.info("Admin user created");
             }
-
         };
     }
-
 }

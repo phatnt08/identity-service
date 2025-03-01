@@ -35,21 +35,35 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 
-@Service
+/**
+ * Service class for handling authentication-related operations.
+ */
+@Service // Indicates that this class is a service component in the Spring application context
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE) // Lombok will make all fields private and assign them the final access level
 public class AuthenticationService {
+
+    // Injecting the UserRepository using constructor injection
     IUserRepository userRepository;
 
+    // JWT signer key injected from application properties
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+    /**
+     * Authenticates a user and generates a JWT token.
+     * 
+     * @param request the authentication request containing user credentials
+     * @return an AuthenticationResponse containing the authentication status and token
+     */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
+        // Find the user by username
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        // Verify the password
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
@@ -57,6 +71,7 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        // Generate the JWT token
         String token = generateToken(user);
 
         return AuthenticationResponse.builder()
@@ -65,6 +80,14 @@ public class AuthenticationService {
                 .build();
     }
 
+    /**
+     * Introspects a JWT token to verify its validity.
+     * 
+     * @param request the introspect request containing the token to be introspected
+     * @return an IntrospectResponse containing the token validity status
+     * @throws JOSEException if there is an error with the JOSE (JSON Object Signing and Encryption) library
+     * @throws ParseException if there is an error parsing the token
+     */
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         String token = request.getToken();
 
@@ -79,9 +102,14 @@ public class AuthenticationService {
         return IntrospectResponse.builder()
                 .valid(valid && expirationTime.after(new Date()))
                 .build();
-
     }
 
+    /**
+     * Generates a JWT token for the authenticated user.
+     * 
+     * @param user the authenticated user
+     * @return the generated JWT token
+     */
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -106,10 +134,16 @@ public class AuthenticationService {
         }
     }
 
+    /**
+     * Builds the scope claim for the JWT token based on the user's roles.
+     * 
+     * @param user the authenticated user
+     * @return the scope claim as a space-separated string
+     */
     private String buildScope(User user) {
         StringJoiner joiner = new StringJoiner(" ");
         if (!CollectionUtils.isEmpty(user.getRoles())) {
-            user.getRoles().forEach(role -> joiner.add(role));
+            user.getRoles().forEach(joiner::add);
         }
 
         return joiner.toString();

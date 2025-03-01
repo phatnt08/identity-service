@@ -1,8 +1,14 @@
 package com.ntp.identity_service.exception;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@NoArgsConstructor // Lombok will generate a constructor with no parameters
+@FieldDefaults(level = AccessLevel.PRIVATE) // Lombok will make all fields private and assign them the default access level
 public class AppException extends RuntimeException {
 
-    private ErrorCode errorCode;
+    ErrorCode errorCode;
 
     public AppException(ErrorCode errorCode) {
         super(errorCode.getMessage());

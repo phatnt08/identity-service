@@ -20,17 +20,29 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * Service class for handling user-related operations.
+ */
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserService {
 
+    // Injecting the UserRepository using constructor injection
     IUserRepository userRepository;
 
+    // Injecting the UserMapper using constructor injection
     IUserMapper userMapper;
 
+    // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
     
+    /**
+     * Creates a new user.
+     * 
+     * @param request the user creation request containing user details
+     * @return the created user response
+     */
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
@@ -48,6 +60,13 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    /**
+     * Updates an existing user.
+     * 
+     * @param id the ID of the user to update
+     * @param request the user update request containing updated user details
+     * @return the updated user response
+     */
     public UserResponse updateUser(String id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -57,15 +76,31 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    /**
+     * Deletes a user by ID.
+     * 
+     * @param id the ID of the user to delete
+     */
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }
 
+    /**
+     * Retrieves a list of all users.
+     * 
+     * @return the list of user responses
+     */
     public List<UserResponse> getUsers() {
         List<UserResponse> userResponses = userMapper.toUserResponseList(userRepository.findAll());
         return userResponses;
     }
 
+    /**
+     * Retrieves a user by ID.
+     * 
+     * @param id the ID of the user to retrieve
+     * @return the user response
+     */
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }

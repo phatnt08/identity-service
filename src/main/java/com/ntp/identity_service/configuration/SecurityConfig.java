@@ -14,7 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.ntp.identity_service.enums.Role;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +29,12 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     private String SIGNER_KEY;
 
+    // configure the security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated());
         httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(jwtDecoder())));
         httpSecurity.csrf(AbstractHttpConfigurer::disable); // short hand of lambda expression
@@ -36,12 +42,24 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+    // change the default prefix of the authority from "SCOPE_" to "ROLE_"
+    @Bean
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
+    }
+
+    // create a JWT decoder
     @Bean
     JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS512).build();
     }
 
+    // create a password encoder
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

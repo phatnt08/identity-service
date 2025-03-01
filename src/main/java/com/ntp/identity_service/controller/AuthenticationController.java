@@ -18,14 +18,21 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@RestController
-@RequestMapping("/auth")
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RestController // annotation to create a REST controller
+@RequestMapping("/auth") // Map the controller to the /auth endpoint
+@RequiredArgsConstructor // Lombok annotation to generate a constructor with all final fields as arguments
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) // Lombok annotation to make the final fields private
 public class AuthenticationController {
 
+    // Injecting the AuthenticationService using constructor injection
     AuthenticationService authenticationService;
 
+    /**
+     * Endpoint to authenticate a user and generate a token.
+     * 
+     * @param request the authentication request containing user credentials
+     * @return an ApiResponse containing the authentication response with the token
+     */
     @PostMapping("/token")
     public ApiResponse<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
         return ApiResponse.<AuthenticationResponse>builder()
@@ -33,6 +40,14 @@ public class AuthenticationController {
                 .build();
     }
 
+    /**
+     * Endpoint to introspect a token and retrieve its details.
+     * 
+     * @param request the introspect request containing the token to be introspected
+     * @return an ApiResponse containing the introspect response with token details
+     * @throws ParseException if there is an error parsing the token
+     * @throws JOSEException if there is an error with the JOSE (JSON Object Signing and Encryption) library
+     */
     @PostMapping("/introspect")
     public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         return ApiResponse.<IntrospectResponse>builder()
