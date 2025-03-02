@@ -68,7 +68,7 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         // Generate the JWT token

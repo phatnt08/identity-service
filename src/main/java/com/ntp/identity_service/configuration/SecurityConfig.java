@@ -35,7 +35,10 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
-        httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(jwtDecoder())));
+        httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(jwtDecoder()))
+                    .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+
         httpSecurity.csrf(AbstractHttpConfigurer::disable); // short hand of lambda expression
 
         return httpSecurity.build();
