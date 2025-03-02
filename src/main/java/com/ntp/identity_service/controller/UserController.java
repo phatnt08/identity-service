@@ -27,7 +27,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController // Lombok annotation to create a REST controller
 @RequestMapping("/users") // Map the controller to the /users endpoint
-@RequiredArgsConstructor // Lombok annotation to generate a constructor with all final fields as arguments
+@RequiredArgsConstructor // Lombok annotation to generate a constructor with all final fields as
+                         // arguments
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE) // Lombok annotation to make the final fields private
 @Slf4j // Lombok annotation to inject a logger
 public class UserController {
@@ -55,13 +56,6 @@ public class UserController {
      */
     @GetMapping
     ApiResponse<List<UserResponse>> getUsers() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        log.info("User: " + authentication.getName());
-        authentication.getAuthorities().forEach(role -> {
-            log.info("Role: " + role.getAuthority());
-        });
-
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getUsers())
                 .build();
@@ -83,7 +77,7 @@ public class UserController {
     /**
      * Endpoint to update a user by ID.
      * 
-     * @param userId the ID of the user to update
+     * @param userId  the ID of the user to update
      * @param request the user update request containing updated user details
      * @return an ApiResponse containing the updated user response
      */
@@ -105,6 +99,18 @@ public class UserController {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder()
                 .result("User deleted successfully")
+                .build();
+    }
+
+    /**
+     * Endpoint to get the current user's information.
+     * 
+     * @return
+     */
+    @GetMapping("/me")
+    ApiResponse<UserResponse> getMe() {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyInfo())
                 .build();
     }
 }

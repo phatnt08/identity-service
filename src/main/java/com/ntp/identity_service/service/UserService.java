@@ -3,6 +3,9 @@ package com.ntp.identity_service.service;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import com.ntp.identity_service.repository.IUserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service class for handling user-related operations.
@@ -26,6 +30,7 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Slf4j
 public class UserService {
 
     // Injecting the UserRepository using constructor injection
@@ -36,7 +41,7 @@ public class UserService {
 
     // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
-    
+
     /**
      * Creates a new user.
      * 
@@ -47,7 +52,7 @@ public class UserService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
-        
+
         User user = userMapper.toUser(request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -63,13 +68,13 @@ public class UserService {
     /**
      * Updates an existing user.
      * 
-     * @param id the ID of the user to update
+     * @param id      the ID of the user to update
      * @param request the user update request containing updated user details
      * @return the updated user response
      */
     public UserResponse updateUser(String id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.update(user, request);
 
@@ -90,7 +95,10 @@ public class UserService {
      * 
      * @return the list of user responses
      */
+    @PreAuthorize("hasRole('ADMIN')") // restrict access to users with the ADMIN role (excute this method before the
+                                      // method is called)
     public List<UserResponse> getUsers() {
+        log.info("Retrieving all users");
         List<UserResponse> userResponses = userMapper.toUserResponseList(userRepository.findAll());
         return userResponses;
     }
@@ -101,8 +109,20 @@ public class UserService {
      * @param id the ID of the user to retrieve
      * @return the user response
      */
+    @PostAuthorize("returnObject.username == authentication.name") // restrict access to the user with the same username
+                                       // (excute this method after the method is called, if not authorized, throw an AccessDeniedException)
     public UserResponse getUser(String id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
+        return userMapper.toUserResponse(
+                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
-    
+
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        var authentication = context.getAuthentication();
+        var username = authentication.getName();
+        return userMapper.toUserResponse(
+                userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
+        
+    }
+
 }
