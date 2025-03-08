@@ -12,7 +12,7 @@ import java.util.Optional;
  * Extends JpaRepository to provide CRUD operations and custom query methods.
  */
 @Repository // Indicates that this interface is a repository component in the Spring application context
-public interface IUserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String> {
 
     /**
      * Finds a User entity by its username.

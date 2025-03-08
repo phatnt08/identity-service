@@ -1,9 +1,6 @@
 package com.ntp.identity_service.dto.response;
 
-import java.time.LocalDate;
 import java.util.Set;
-
-import com.ntp.identity_service.entity.Role;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,12 +14,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor // lombok annotation to generate all-args constructor
 @Builder // lombok annotation to generate builder pattern
 @FieldDefaults(level = AccessLevel.PRIVATE) // lombok annotation to set access level of fields
-public class UserResponse {
-    String id;
-    String username;
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
-    // Set of roles (Set is a collection that contains no duplicate elements)
-    Set<Role> roles;
+public class RoleResponse {
+    String name;
+    String description;
+    Set<PermissionResponse> permissions;
 }

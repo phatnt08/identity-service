@@ -15,7 +15,7 @@ import com.ntp.identity_service.entity.User;
  * Mapper interface for converting between User entities and DTOs.
  */
 @Mapper(componentModel = "spring")
-public interface IUserMapper {
+public interface UserMapper {
     
     /**
      * Converts a UserCreationRequest to a User entity.

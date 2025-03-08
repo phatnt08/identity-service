@@ -16,8 +16,8 @@ import com.ntp.identity_service.entity.User;
 import com.ntp.identity_service.enums.Role;
 import com.ntp.identity_service.exception.AppException;
 import com.ntp.identity_service.exception.ErrorCode;
-import com.ntp.identity_service.mapper.IUserMapper;
-import com.ntp.identity_service.repository.IUserRepository;
+import com.ntp.identity_service.mapper.UserMapper;
+import com.ntp.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 
     // Injecting the UserRepository using constructor injection
-    IUserRepository userRepository;
+    UserRepository userRepository;
 
     // Injecting the UserMapper using constructor injection
-    IUserMapper userMapper;
+    UserMapper userMapper;
 
     // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
@@ -60,7 +60,7 @@ public class UserService {
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
 
-        user.setRoles(roles);
+        // user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }

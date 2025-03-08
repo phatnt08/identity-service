@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ntp.identity_service.entity.User;
 import com.ntp.identity_service.enums.Role;
-import com.ntp.identity_service.repository.IUserRepository;
+import com.ntp.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class ApplicationInitConfig {
      * @return an ApplicationRunner to execute the custom logic
      */
     @Bean
-    ApplicationRunner applicationRunner(IUserRepository userRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository) {
         return _ -> {
             System.out.println("Application started");
 
@@ -46,7 +46,7 @@ public class ApplicationInitConfig {
                 User admin = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
-                        .roles(roles)
+                        // .roles(roles)
                         .build();
 
                 userRepository.save(admin);

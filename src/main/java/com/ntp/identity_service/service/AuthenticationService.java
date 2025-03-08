@@ -28,7 +28,7 @@ import com.ntp.identity_service.dto.response.IntrospectResponse;
 import com.ntp.identity_service.entity.User;
 import com.ntp.identity_service.exception.AppException;
 import com.ntp.identity_service.exception.ErrorCode;
-import com.ntp.identity_service.repository.IUserRepository;
+import com.ntp.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ import lombok.experimental.NonFinal;
 public class AuthenticationService {
 
     // Injecting the UserRepository using constructor injection
-    IUserRepository userRepository;
+    UserRepository userRepository;
 
     // JWT signer key injected from application properties
     @NonFinal
@@ -143,7 +143,7 @@ public class AuthenticationService {
     private String buildScope(User user) {
         StringJoiner joiner = new StringJoiner(" ");
         if (!CollectionUtils.isEmpty(user.getRoles())) {
-            user.getRoles().forEach(joiner::add);
+            // user.getRoles().forEach(joiner::add);
         }
 
         return joiner.toString();

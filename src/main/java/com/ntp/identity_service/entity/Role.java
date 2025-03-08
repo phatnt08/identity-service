@@ -1,11 +1,8 @@
 package com.ntp.identity_service.entity;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.AccessLevel;
@@ -21,17 +18,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE) // lombok annotation to set access level of fields
 @Builder // lombok annotation to generate builder pattern
 @Entity // JPA annotation to make this class an Entity
-public class User {
+public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) 
-    String id;
-    String username;
-    String password;
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
-    @ManyToMany
-    Set<Role> roles; // Set of roles that the user has (Set # List for uniqueness)
+    String name;
+    String description;
 
+    @ManyToMany
+    Set<Permission> permissions;
 }
