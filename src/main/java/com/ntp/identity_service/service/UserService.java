@@ -17,6 +17,7 @@ import com.ntp.identity_service.enums.Role;
 import com.ntp.identity_service.exception.AppException;
 import com.ntp.identity_service.exception.ErrorCode;
 import com.ntp.identity_service.mapper.UserMapper;
+import com.ntp.identity_service.repository.RoleRepository;
 import com.ntp.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -35,6 +36,8 @@ public class UserService {
 
     // Injecting the UserRepository using constructor injection
     UserRepository userRepository;
+
+    RoleRepository roleRepository;
 
     // Injecting the UserMapper using constructor injection
     UserMapper userMapper;
@@ -77,6 +80,10 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.update(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }

@@ -1,5 +1,8 @@
 package com.ntp.identity_service.exception;
 
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,6 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ntp.identity_service.dto.response.ApiResponse;
 
+import jakarta.validation.ConstraintViolation;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,7 +21,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ControllerAdvice
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GlobalExceptionHandler {
+
+    static final String MIN_ATTRIBUTE = "min";
 
     /**
      * Handles general exceptions.
@@ -56,6 +65,7 @@ public class GlobalExceptionHandler {
      * @param e the MethodArgumentNotValidException
      * @return a ResponseEntity containing the error response
      */
+    @SuppressWarnings("unchecked")
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<String>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
@@ -65,15 +75,24 @@ public class GlobalExceptionHandler {
             String errorKey = e.getFieldError().getDefaultMessage();
 
             ErrorCode errorCode;
+            Map<String, Object> attributes;
 
             try {
                 errorCode = ErrorCode.valueOf(errorKey);
+
+                var constraintViolation = e.getBindingResult().getAllErrors().getFirst()
+                        .unwrap(ConstraintViolation.class);
+                attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+
+                log.error("Validation error: {}", attributes.toString());
+
             } catch (IllegalArgumentException ex) {
                 return handleGeneralException(ex);
             }
 
             response.setCode(errorCode.getCode());
-            response.setMessage(errorCode.getMessage());
+            response.setMessage(Objects.nonNull(attributes) ? mapAttribute(errorCode.getMessage(), attributes)
+                    : errorCode.getMessage());
 
         } else {
             return handleGeneralException(e);
@@ -90,6 +109,14 @@ public class GlobalExceptionHandler {
         response.setMessage(ErrorCode.FORBIDDEN.getMessage());
 
         return ResponseEntity.status(ErrorCode.FORBIDDEN.getHttpStatusCode()).body(response);
+    }
+
+    private String mapAttribute(String message, Map<String, Object> attributes) {
+        if (attributes.containsKey(MIN_ATTRIBUTE)) {
+            message = message.replace("{" + MIN_ATTRIBUTE + "}", attributes.get(MIN_ATTRIBUTE).toString());
+        }
+
+        return message;
     }
 
 }

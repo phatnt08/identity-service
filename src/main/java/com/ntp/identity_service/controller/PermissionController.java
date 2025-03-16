@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/permissions")
@@ -49,6 +50,13 @@ public class PermissionController {
         log.info("Get permission by name: {}", name);
         return ApiResponse.<PermissionResponse>builder()
                 .result(permissionService.get(name))
+                .build();
+    }
+
+    @PutMapping("/{name}")
+    public ApiResponse<PermissionResponse> put(@PathVariable String name, @RequestBody PermissionRequest request) {
+        return ApiResponse.<PermissionResponse>builder()
+                .result(permissionService.update(name, request))
                 .build();
     }
 

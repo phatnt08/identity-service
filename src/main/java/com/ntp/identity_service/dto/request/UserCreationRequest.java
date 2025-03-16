@@ -2,6 +2,8 @@ package com.ntp.identity_service.dto.request;
 
 import java.time.LocalDate;
 
+import com.ntp.identity_service.validator.Annotation.Age.Age;
+
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,8 @@ public class UserCreationRequest {
     String password;
     String firstName;
     String lastName;
+
+    @Age(min = 19, message = "USER_AGE_INVALID") // Custom annotation to validate date of birth
     LocalDate dateOfBirth;
 
 }

@@ -19,17 +19,28 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Security configuration class for setting up security filters and authentication mechanisms.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // Public endpoints that do not require authentication
     private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/token", "/auth/introspect" };
 
+    // JWT signer key injected from application properties
     @Value("${jwt.signerKey}")
     private String SIGNER_KEY;
 
-    // configure the security filter chain
+    /**
+     * Configures the security filter chain.
+     * 
+     * @param httpSecurity the HttpSecurity object to configure
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(
@@ -39,12 +50,16 @@ public class SecurityConfig {
                     .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
-        httpSecurity.csrf(AbstractHttpConfigurer::disable); // short hand of lambda expression
+        httpSecurity.csrf(AbstractHttpConfigurer::disable); // shorthand for lambda expression
 
         return httpSecurity.build();
     }
 
-    // change the default prefix of the authority from "SCOPE_" to "ROLE_"
+    /**
+     * Changes the default prefix of the authority from "SCOPE_" to "ROLE_".
+     * 
+     * @return the configured JwtAuthenticationConverter
+     */
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -54,14 +69,22 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    // create a JWT decoder
+    /**
+     * Creates a JWT decoder.
+     * 
+     * @return the configured JwtDecoder
+     */
     @Bean
     JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS512).build();
     }
 
-    // create a password encoder
+    /**
+     * Creates a password encoder.
+     * 
+     * @return the configured PasswordEncoder
+     */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
