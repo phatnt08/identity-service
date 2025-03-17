@@ -9,6 +9,8 @@ import java.text.ParseException;
 import com.nimbusds.jose.JOSEException;
 import com.ntp.identity_service.dto.request.AuthenticationRequest;
 import com.ntp.identity_service.dto.request.IntrospectRequest;
+import com.ntp.identity_service.dto.request.LogoutRequest;
+import com.ntp.identity_service.dto.request.RefreshRequest;
 import com.ntp.identity_service.dto.response.ApiResponse;
 import com.ntp.identity_service.dto.response.AuthenticationResponse;
 import com.ntp.identity_service.dto.response.IntrospectResponse;
@@ -54,5 +56,20 @@ public class AuthenticationController {
                 .result(authenticationService.introspect(request))
                 .build();
     }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(authenticationService.refreshToken(request))
+                .build();
+    }
+    
     
 }

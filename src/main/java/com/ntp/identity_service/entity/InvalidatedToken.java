@@ -1,9 +1,9 @@
-package com.ntp.identity_service.dto.request;
+package com.ntp.identity_service.entity;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Date;
 
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,16 +14,12 @@ import lombok.experimental.FieldDefaults;
 @Data // lombok annotation to generate getter and setter
 @NoArgsConstructor // lombok annotation to generate no-args constructor
 @AllArgsConstructor // lombok annotation to generate all-args constructor
-@Builder // lombok annotation to generate builder pattern
 @FieldDefaults(level = AccessLevel.PRIVATE) // lombok annotation to set access level of fields
-public class UserUpdateRequest {
+@Builder // lombok annotation to generate builder pattern
+@Entity // JPA annotation to make this class an Entity
+public class InvalidatedToken {
 
-    // @Size annotation to set the size of the field
-    @Size(min = 8, message = "PASSWORD_INVALID")
-    String password;
-    
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
-    List<String> roles;
+    @Id
+    String Id;
+    Date experyTime;
 }

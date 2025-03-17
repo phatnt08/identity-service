@@ -1,8 +1,5 @@
 package com.ntp.identity_service.configuration;
-
-import javax.crypto.spec.SecretKeySpec;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,9 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,11 +22,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     // Public endpoints that do not require authentication
-    private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/token", "/auth/introspect" };
+    private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh" };
 
-    // JWT signer key injected from application properties
-    @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    @Autowired
+    private CustomJwtDecoder customJwtDecoder;
 
     /**
      * Configures the security filter chain.
@@ -46,7 +39,7 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(
                 requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
-        httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(jwtDecoder()))
+        httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(customJwtDecoder))
                     .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
@@ -67,17 +60,6 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
-    }
-
-    /**
-     * Creates a JWT decoder.
-     * 
-     * @return the configured JwtDecoder
-     */
-    @Bean
-    JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKey = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
-        return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS512).build();
     }
 
     /**
