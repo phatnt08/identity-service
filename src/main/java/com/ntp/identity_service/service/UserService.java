@@ -3,6 +3,7 @@ package com.ntp.identity_service.service;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,10 +53,6 @@ public class UserService {
      * @return the created user response
      */
     public UserResponse createUser(UserCreationRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        }
-
         User user = userMapper.toUser(request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -63,9 +60,13 @@ public class UserService {
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
 
-        // user.setRoles(roles);
-
-        return userMapper.toUserResponse(userRepository.save(user));
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+        
+        return userMapper.toUserResponse(user);
     }
 
     /**

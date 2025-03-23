@@ -3,6 +3,7 @@ package com.ntp.identity_service.entity;
 import java.time.LocalDate;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +25,14 @@ import lombok.experimental.FieldDefaults;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) 
+    @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
+    // @Column annotation to specify the column name, unique constraint and
+    // collation
+    // utf8mb4_unicode_ci is a collation that supports 4-byte characters and
+    // case-insensitive comparison
+    @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String username;
     String password;
     String firstName;

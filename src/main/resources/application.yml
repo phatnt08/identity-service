@@ -19,4 +19,6 @@ server:
         context-path: /identity
 
 jwt:
-  signerKey: l0Ba9kVUWQbOtIcOWNaiE6EHfRxwrik6vrHb9ojh7n1NlsM6k0Wt2UjD9xzwvP3r
+  signer-key: l0Ba9kVUWQbOtIcOWNaiE6EHfRxwrik6vrHb9ojh7n1NlsM6k0Wt2UjD9xzwvP3r
+  expiry-time: 3600000 # in milliseconds (1 hour)
+  refresh-time: 86400000 # in milliseconds (1 day)

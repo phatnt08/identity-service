@@ -39,6 +39,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service class for handling authentication-related operations.
@@ -48,6 +49,7 @@ import lombok.experimental.NonFinal;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE) // Lombok will make all fields private and assign them the
                                                               // final access level
+@Slf4j // Lombok will generate a logger field
 public class AuthenticationService {
 
     // Injecting the UserRepository using constructor injection
@@ -56,9 +58,17 @@ public class AuthenticationService {
     InvalidatedRepository invalidatedRepository;
 
     // JWT signer key injected from application properties
-    @NonFinal
-    @Value("${jwt.signerKey}")
+    @NonFinal // Lombok will not make this field final
+    @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
+
+    @NonFinal
+    @Value("${jwt.expiry-time}")
+    protected long EXPIRY_TIME;
+
+    @NonFinal
+    @Value("${jwt.refresh-time}")
+    protected long REFRESH_TIME;
 
     /**
      * Authenticates a user and generates a JWT token.
@@ -104,7 +114,7 @@ public class AuthenticationService {
         boolean valid = true;
 
         try {
-            verifyToken(token);
+            verifyToken(token, false);
         } catch (AppException e) {
             valid = false;
         }
@@ -115,25 +125,28 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) throws JOSEException, ParseException {
-        SignedJWT signedJWT = verifyToken(request.getToken());
+        try {
+            SignedJWT signedJWT = verifyToken(request.getToken(), true);
+            String jti = signedJWT.getJWTClaimsSet().getJWTID();
+            Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        String jti = signedJWT.getJWTClaimsSet().getJWTID();
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .Id(jti)
+                    .experyTime(expirationTime)
+                    .build();
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .Id(jti)
-                .experyTime(expirationTime)
-                .build();
-
-        invalidatedRepository.save(invalidatedToken);
+            invalidatedRepository.save(invalidatedToken);
+        } catch (AppException e) {
+            log.error("Token already expired", e);
+        }
     }
 
     public AuthenticationResponse refreshToken(RefreshRequest request) throws JOSEException, ParseException {
-        SignedJWT signedJWT = verifyToken(request.getToken());
+        SignedJWT signedJWT = verifyToken(request.getToken(), true);
 
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        
+
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .Id(jti)
                 .experyTime(expirationTime)
@@ -166,7 +179,7 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("ntp")
                 .issueTime(new Date())
-                .expirationTime(new Date(System.currentTimeMillis() + 3600000))
+                .expirationTime(new Date(System.currentTimeMillis() + EXPIRY_TIME))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user)) // scope claim is standard of oauth2
                 .build();
@@ -199,14 +212,15 @@ public class AuthenticationService {
         return joiner.toString();
     }
 
-    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         boolean valid = signedJWT.verify(verifier);
 
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expirationTime = isRefresh ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().getTime() + REFRESH_TIME)
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         if (!(valid && expirationTime.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
