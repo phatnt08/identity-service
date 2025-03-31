@@ -1,0 +1,3 @@
+jwt:
+  expiry-time: 7200000 # in milliseconds (2 hours)
+  refresh-time: 172800000 # in milliseconds (2 days)
