@@ -16,4 +16,10 @@ docker image push phatnt8888/identity-service:0.9.0
 
 # Run the identity-service container on the custom network, linking it to the MySQL container
 docker run --network my-network --name identity-service -p 8080:8080 -e DB_URL=jdbc:mysql://mysql:3306/identity-service identity-service:1.0.0
+
+# Pull iamge just push to docke hub
+docker pull phatnt8888/identity-service:0.9.0
+
+# Run docker image phatnt8888/identity-service:0.9.0 on docker desktop
+docker run --network my-network --name identity-service -p 8080:8080 -e DB_URL=jdbc:mysql://mysql:3306/identity-service phatnt8888/identity-service:0.9.0
 ```
