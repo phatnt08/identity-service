@@ -14,7 +14,7 @@ spring:
     show-sql: true
 
 server:
-  port: ${SERVER_PORT:8080} # Default value if SERVER_PORT is not set
+  port: ${SERVER_PORT:8081} # Default value if SERVER_PORT is not set
   servlet:
     context-path: /identity
 
@@ -22,3 +22,7 @@ jwt:
   signer-key: ${JWT_SIGNER_KEY:HQ8N2AYzoBFfkaMGafXxQidH2sGZb9QIE4BlRruZ1/2CYtTWOlDMI8cYRw6++ANm} # Default value if JWT_SIGNER_KEY is not set
   expiry-time: ${JWT_EXPIRATION:3600000} # Default value if JWT_EXPIRATION is not set (1 hour)
   refresh-time: ${JWT_REFRESH_EXPIRATION:86400000} # Default value if JWT_REFRESH_EXPIRATION is not set (1 day)
+
+app:
+  services:
+    profile: http://localhost:8082/profile

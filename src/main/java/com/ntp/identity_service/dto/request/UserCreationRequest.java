@@ -31,5 +31,6 @@ public class UserCreationRequest {
 
     @Age(min = 19, message = "USER_AGE_INVALID") // Custom annotation to validate date of birth
     LocalDate dateOfBirth;
+    String city;
 
 }

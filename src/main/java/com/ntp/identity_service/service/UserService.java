@@ -18,8 +18,10 @@ import com.ntp.identity_service.enums.Role;
 import com.ntp.identity_service.exception.AppException;
 import com.ntp.identity_service.exception.ErrorCode;
 import com.ntp.identity_service.mapper.UserMapper;
+import com.ntp.identity_service.mapper.UserProfileMapper;
 import com.ntp.identity_service.repository.RoleRepository;
 import com.ntp.identity_service.repository.UserRepository;
+import com.ntp.identity_service.repository.httpclient.ProfileClient;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +42,11 @@ public class UserService {
 
     RoleRepository roleRepository;
 
+    ProfileClient profileClient;
+
     // Injecting the UserMapper using constructor injection
     UserMapper userMapper;
+    UserProfileMapper userProfileMapper;
 
     // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
@@ -62,10 +67,15 @@ public class UserService {
 
         try {
             user = userRepository.save(user);
+            var profileRequest = userProfileMapper.toProfileCreationRequest(request);
+            profileRequest.setUserId(user.getId());
+            var resp = profileClient.createProfile(profileRequest);
+            log.info("Profile created successfully: {}", resp);
+
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
-        
+
         return userMapper.toUserResponse(user);
     }
 
@@ -118,7 +128,8 @@ public class UserService {
      * @return the user response
      */
     @PostAuthorize("returnObject.username == authentication.name") // restrict access to the user with the same username
-                                       // (excute this method after the method is called, if not authorized, throw an AccessDeniedException)
+    // (excute this method after the method is called, if not authorized, throw an
+    // AccessDeniedException)
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(
                 userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
@@ -130,7 +141,7 @@ public class UserService {
         var username = authentication.getName();
         return userMapper.toUserResponse(
                 userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
-        
+
     }
 
 }

@@ -35,9 +35,6 @@ public class User {
     @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String username;
     String password;
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
     @ManyToMany
     Set<Role> roles; // Set of roles that the user has (Set # List for uniqueness)
 
