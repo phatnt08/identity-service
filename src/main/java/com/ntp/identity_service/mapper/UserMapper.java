@@ -33,6 +33,9 @@ public interface UserMapper {
      * @param user the User entity
      * @return the UserResponse DTO
      */
+    @Mapping(target = "firstName", ignore = true)
+    @Mapping(target = "lastName", ignore = true)
+    @Mapping(target = "dateOfBirth", ignore = true)
     UserResponse toUserResponse(User user);
 
     /**

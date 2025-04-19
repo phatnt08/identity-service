@@ -76,7 +76,12 @@ public class UserService {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        return userMapper.toUserResponse(user);
+        UserResponse userResponse = userMapper.toUserResponse(user);
+        userResponse.setFirstName(request.getFirstName());
+        userResponse.setLastName(request.getLastName());
+        userResponse.setDateOfBirth(request.getDateOfBirth());
+
+        return userResponse;
     }
 
     /**

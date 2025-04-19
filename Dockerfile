@@ -12,7 +12,7 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # Stage 2: Create the runtime image
-FROM amazoncorretto:24
+FROM amazoncorretto:24.0.1-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=build /app/target/identity-service-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port your Spring Boot application runs on
-EXPOSE 8080
+EXPOSE 8081
 
 # Set the default command to run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]

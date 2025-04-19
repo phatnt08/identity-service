@@ -25,4 +25,4 @@ jwt:
 
 app:
   services:
-    profile: http://localhost:8082/profile
+    profile: ${PROFILE_SERVICE_URL:http://localhost:8082/profile}

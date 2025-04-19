@@ -1,6 +1,5 @@
 package com.ntp.identity_service.entity;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 import jakarta.persistence.Column;

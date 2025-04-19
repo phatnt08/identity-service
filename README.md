@@ -9,7 +9,7 @@ docker run --network my-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD
 docker build -t identity-service:1.0.0 .
 
 # Run the identity-service container on the custom network, linking it to the MySQL container
-docker run --network my-network --name identity-service -p 8080:8080 -e DB_URL=jdbc:mysql://mysql:3306/identity-service identity-service:1.0.0
+docker run --network my-network --name identity-service -p 8081:8081 -e DB_URL=jdbc:mysql://mysql:3306/identity-service identity-service:1.0.0
 
 # Optionally, build and tag the image for pushing to a Docker registry
 docker build -t phatnt8888/identity-service:1.0.0 .
@@ -21,5 +21,5 @@ docker image push phatnt8888/identity-service:1.0.0
 docker pull phatnt8888/identity-service:1.0.0
 
 # Run docker image phatnt8888/identity-service:0.9.0 on docker desktop
-docker run --network my-network --name identity-service -p 8081:8080 -e DB_URL=jdbc:mysql://mysql:3306/identity-service phatnt8888/identity-service:1.0.0
+docker run --network my-network --name identity-service -p 8081:8081 -e DB_URL=jdbc:mysql://mysql:3306/identity-service -e PROFILE_SERVICE_URL=http://profile-service:8082/profile phatnt8888/identity-service:1.0.0
 ```
