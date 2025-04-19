@@ -21,5 +21,5 @@ docker image push phatnt8888/identity-service:1.0.0
 docker pull phatnt8888/identity-service:1.0.0
 
 # Run docker image phatnt8888/identity-service:0.9.0 on docker desktop
-docker run --network my-network --name identity-service -p 8081:8081 -e DB_URL=jdbc:mysql://mysql:3306/identity-service -e PROFILE_SERVICE_URL=http://profile-service:8082/profile phatnt8888/identity-service:1.0.0
+docker run --network my-network --name identity-service -p 8081:8081 -e DB_URL=jdbc:mysql://mysql:3306/identity-service -e PROFILE_SERVICE_URL=http://profile-service:8082/profile/internal phatnt8888/identity-service:1.0.0
 ```
