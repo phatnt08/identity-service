@@ -16,9 +16,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE) // lombok annotation to set access level of fields
 // @JsonInclude annotation to include properties that are not null
 // Not generating if property is null
-@JsonInclude(JsonInclude.Include.NON_NULL) // lombok annotation to set access level of fields
+@JsonInclude(JsonInclude.Include.NON_NULL) // Json will not render field null into object return
 public class ApiResponse<T> {
-    int code;
+    @Builder.Default
+    int code = 200;
     String message;
     T result;
 }

@@ -6,7 +6,6 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -70,6 +69,8 @@ public class AuthenticationService {
     @Value("${jwt.refresh-time}")
     protected long REFRESH_TIME;
 
+    PasswordEncoder passwordEncoder;
+
     /**
      * Authenticates a user and generates a JWT token.
      * 
@@ -84,7 +85,6 @@ public class AuthenticationService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Verify the password
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
