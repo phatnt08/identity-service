@@ -25,7 +25,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     // Public endpoints that do not require authentication
-    private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh" };
+    private final String[] PUBLIC_ENDPOINTS = { "/users/registration", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh" };
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;

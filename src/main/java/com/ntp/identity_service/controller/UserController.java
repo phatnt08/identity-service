@@ -41,7 +41,7 @@ public class UserController {
      * @param request the user creation request containing user details
      * @return an ApiResponse containing the created user response
      */
-    @PostMapping
+    @PostMapping("/registration")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
