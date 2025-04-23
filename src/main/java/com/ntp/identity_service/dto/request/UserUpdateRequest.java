@@ -3,7 +3,7 @@ package com.ntp.identity_service.dto.request;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.constraints.Size;
+// import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

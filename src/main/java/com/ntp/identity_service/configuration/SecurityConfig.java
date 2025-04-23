@@ -1,4 +1,5 @@
 package com.ntp.identity_service.configuration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 /**
- * Security configuration class for setting up security filters and authentication mechanisms.
+ * Security configuration class for setting up security filters and
+ * authentication mechanisms.
  */
 @Configuration
 @EnableWebSecurity
@@ -25,7 +27,8 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     // Public endpoints that do not require authentication
-    private final String[] PUBLIC_ENDPOINTS = { "/users/registration", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh" };
+    private final String[] PUBLIC_ENDPOINTS = { "/users/registration", "/auth/token", "/auth/introspect",
+            "/auth/logout", "/auth/refresh" };
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -43,8 +46,8 @@ public class SecurityConfig {
                 requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
         httpSecurity.oauth2ResourceServer(o2 -> o2.jwt(j -> j.decoder(customJwtDecoder))
-                    .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable); // shorthand for lambda expression
 
