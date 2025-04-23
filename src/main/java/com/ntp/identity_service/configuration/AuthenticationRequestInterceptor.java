@@ -1,7 +1,7 @@
 package com.ntp.identity_service.configuration;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
+// import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
