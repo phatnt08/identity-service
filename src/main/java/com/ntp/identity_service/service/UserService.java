@@ -67,21 +67,21 @@ public class UserService {
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
 
-        // user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // HashSet<String> roles = new HashSet<>();
-        // roles.add(Role.USER.name());
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
 
-        // try {
-        // user = userRepository.save(user);
-        // var profileRequest = userProfileMapper.toProfileCreationRequest(request);
-        // profileRequest.setUserId(user.getId());
-        // var resp = profileClient.createProfile(profileRequest);
-        // log.info("Profile created successfully: {}", resp);
+        try {
+        user = userRepository.save(user);
+        var profileRequest = userProfileMapper.toProfileCreationRequest(request);
+        profileRequest.setUserId(user.getId());
+        var resp = profileClient.createProfile(profileRequest);
+        log.info("Profile created successfully: {}", resp);
 
-        // } catch (DataIntegrityViolationException e) {
-        // throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        // }
+        } catch (DataIntegrityViolationException e) {
+        throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+        }
 
         UserResponse userResponse = userMapper.toUserResponse(user);
         userResponse.setFirstName(request.getFirstName());
@@ -99,7 +99,6 @@ public class UserService {
         }
 
         // publish message to Kafka topic
-        // String currentTime = java.time.LocalDateTime.now().toString();
         kafkaTemplate.send("test-topic", userResponseJson);
 
         return userResponse;
