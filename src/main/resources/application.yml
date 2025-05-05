@@ -13,6 +13,16 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  kafka:
+    properties:
+      retries: 5
+      request.timeout.ms: 30000
+      retry.backoff.ms: 10000
+    bootstrap-servers: localhost:9192,localhost:9193
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 server:
   port: ${SERVER_PORT:8081} # Default value if SERVER_PORT is not set
   servlet:

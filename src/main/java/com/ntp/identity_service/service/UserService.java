@@ -4,12 +4,16 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ntp.identity_service.dto.request.UserCreationRequest;
 import com.ntp.identity_service.dto.request.UserUpdateRequest;
 import com.ntp.identity_service.dto.response.UserResponse;
@@ -51,35 +55,52 @@ public class UserService {
     // Injecting the PasswordEncoder using constructor injection
     PasswordEncoder passwordEncoder;
 
+    KafkaTemplate<String, String> kafkaTemplate;
+
     /**
      * Creates a new user.
      * 
      * @param request the user creation request containing user details
      * @return the created user response
+     * @throws JsonProcessingException
      */
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        // user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
+        // HashSet<String> roles = new HashSet<>();
+        // roles.add(Role.USER.name());
 
-        try {
-            user = userRepository.save(user);
-            var profileRequest = userProfileMapper.toProfileCreationRequest(request);
-            profileRequest.setUserId(user.getId());
-            var resp = profileClient.createProfile(profileRequest);
-            log.info("Profile created successfully: {}", resp);
+        // try {
+        // user = userRepository.save(user);
+        // var profileRequest = userProfileMapper.toProfileCreationRequest(request);
+        // profileRequest.setUserId(user.getId());
+        // var resp = profileClient.createProfile(profileRequest);
+        // log.info("Profile created successfully: {}", resp);
 
-        } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        }
+        // } catch (DataIntegrityViolationException e) {
+        // throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+        // }
 
         UserResponse userResponse = userMapper.toUserResponse(user);
         userResponse.setFirstName(request.getFirstName());
         userResponse.setLastName(request.getLastName());
         userResponse.setDateOfBirth(request.getDateOfBirth());
+
+        // Serialize userResponse to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String userResponseJson = "";
+        try {
+            userResponseJson = objectMapper.writeValueAsString(userResponse);
+        } catch (JsonProcessingException e) {
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        // publish message to Kafka topic
+        // String currentTime = java.time.LocalDateTime.now().toString();
+        kafkaTemplate.send("test-topic", userResponseJson);
 
         return userResponse;
     }
